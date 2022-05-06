@@ -11,6 +11,8 @@ type RGB = image::Rgb<u8>;
 type ImgBuffer = image::ImageBuffer<RGB, Vec<u8>>;
 type BlockMap = HashMap<[u8; 3], ImgBuffer>;
 
+const BLOCK_SIZE: u32 = 16;
+
 fn get_blocks_map() -> BlockMap {
 	let files = read_dir(Path::new("./blocks"))
 		.expect("You must download Minecraft blocks textures into ./block directory");
@@ -55,6 +57,9 @@ fn get_best_block<'a>(map: &'a BlockMap, pixel: &'a RGB) -> ImgBuffer {
 fn main() {
 	let map = get_blocks_map();
 
+	println!("Enter image file name: ");
+	stdout().flush().unwrap();
+
 	let mut name = String::new();
 	stdin().read_line(&mut name).unwrap();
 	let name = Path::new(name.trim());
@@ -63,20 +68,20 @@ fn main() {
 	println!("Path loaded");
 	let now = Instant::now();
 
-	let mut output_img = ImgBuffer::new(input_img.width()*16, input_img.height()*16);
+	let mut output_img = ImgBuffer::new(input_img.width()*BLOCK_SIZE, input_img.height()*BLOCK_SIZE);
 	let (sender, receiver) = mpsc::channel();
 	let img = input_img.clone();
 
 	thread::spawn(move || {
 		for p in img.pixels() {
-			sender.send(get_best_block(&map, p)).expect("Error while sending block");
+			sender.send(get_best_block(&map, p)).expect("Error during sending block");
 		}
 	});
 	for (_x, _y, _) in input_img.enumerate_pixels() {
-		let block = receiver.recv().expect("Error while receiving block");
-		for x in 0..16 as u32 {
-			for y in 0..16 as u32 {
-				*(output_img.get_pixel_mut(16 * _x + x, 16 * _y + y)) = *(block.get_pixel(x, y));
+		let block = receiver.recv().expect("Error during receiving block");
+		for x in 0..BLOCK_SIZE {
+			for y in 0..BLOCK_SIZE {
+				*(output_img.get_pixel_mut(BLOCK_SIZE * _x + x, BLOCK_SIZE * _y + y)) = *(block.get_pixel(x, y));
 			}
 		}
 	}
