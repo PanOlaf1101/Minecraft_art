@@ -57,7 +57,7 @@ fn get_best_block<'a>(map: &'a BlockMap, pixel: &'a RGB) -> ImgBuffer {
 fn main() {
 	let map = get_blocks_map();
 
-	println!("Enter image file name: ");
+	print!("Enter image file name: ");
 	stdout().flush().unwrap();
 
 	let mut name = String::new();
