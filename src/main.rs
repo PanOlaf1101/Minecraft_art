@@ -2,6 +2,7 @@ use std::io::*;
 use std::path::Path;
 use std::fs::read_dir;
 use std::sync::mpsc;
+use std::env::args;
 use std::thread;
 use std::time::Instant;
 use image::Pixel;
@@ -57,11 +58,15 @@ fn get_best_block<'a>(map: &'a BlockMap, pixel: &'a RGB) -> ImgBuffer {
 fn main() {
 	let map = get_blocks_map();
 
-	print!("Enter image file name: ");
-	stdout().flush().unwrap();
-
-	let mut name = String::new();
-	stdin().read_line(&mut name).unwrap();
+	let name = if args().len() >= 2 {
+		args().collect::<Vec<_>>()[1].clone()
+	} else {
+		print!("Enter image file name: ");
+		stdout().flush().unwrap();
+		let mut name = String::new();
+		stdin().read_line(&mut name).unwrap();
+		name
+	};
 	let name = Path::new(name.trim());
 
 	let input_img = image::open(name).unwrap().to_rgb8();
