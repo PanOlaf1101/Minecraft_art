@@ -8,12 +8,18 @@ use std::time::Instant;
 use image::Pixel;
 use std::collections::HashMap;
 
+//alias for a single pixel
 type RGB = image::Rgb<u8>;
+
 type ImgBuffer = image::ImageBuffer<RGB, Vec<u8>>;
+
+//map where red, blue and green color channels are the key and an image is the value
 type BlockMap = HashMap<[u8; 3], ImgBuffer>;
 
+//block shall be 16 pixel wide and 16 high
 const BLOCK_SIZE: u32 = 16;
 
+//generates a Minecraft BlockMap with images in ./blocks
 fn get_blocks_map() -> BlockMap {
 	let files = read_dir(Path::new("./blocks"))
 		.expect("You must download Minecraft blocks textures into ./block directory");
@@ -36,7 +42,8 @@ fn get_blocks_map() -> BlockMap {
 	map
 }
 
-fn get_best_block<'a>(map: &'a BlockMap, pixel: &'a RGB) -> ImgBuffer {
+//matches a pixel with a block
+fn get_best_block(map: &BlockMap, pixel: &RGB) -> ImgBuffer {
 	let colors = pixel.channels();
 	let mut diffrence = 10000u32;
 	let mut img = &ImgBuffer::default();
@@ -71,29 +78,33 @@ fn main() {
 
 	let input_img = image::open(name).unwrap().to_rgb8();
 	println!("Path loaded");
+
+	//benchmarking timer
 	let now = Instant::now();
 
 	let mut output_img = ImgBuffer::new(input_img.width()*BLOCK_SIZE, input_img.height()*BLOCK_SIZE);
 	let (sender, receiver) = mpsc::channel();
-	let img = input_img.clone();
 
 	thread::spawn(move || {
-		for p in img.pixels() {
-			sender.send(get_best_block(&map, p)).expect("Error during sending block");
+		for (x, y, p) in input_img.enumerate_pixels() {
+			sender.send((x, y, get_best_block(&map, p))).expect("Error during sending block");
 		}
 	});
-	for (_x, _y, _) in input_img.enumerate_pixels() {
-		let block = receiver.recv().expect("Error during receiving block");
+	for (_x, _y, block) in receiver {
 		for x in 0..BLOCK_SIZE {
 			for y in 0..BLOCK_SIZE {
 				*(output_img.get_pixel_mut(BLOCK_SIZE * _x + x, BLOCK_SIZE * _y + y)) = *(block.get_pixel(x, y));
 			}
 		}
 	}
+
 	let time1 = now.elapsed();
 	println!("Processing completed in {:.2?}", time1);
+
+	//suprisingly saving an image on hard drive takes more time than calling ``
 	let now = Instant::now();
 	output_img.save("./minecraft_art.jpeg").unwrap();
+
 	let time2 = now.elapsed();
 	println!("Saving image took {:.2?}", time2);
 	println!("Summary: {:.2?}", time1 + time2);
