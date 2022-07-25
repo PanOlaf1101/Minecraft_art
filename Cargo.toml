@@ -7,3 +7,13 @@ edition = "2021"
 
 [dependencies]
 image = "0.23.14"
+
+[profile.release]
+lto = true
+opt-level = 3
+debug = 0
+debug-assertions = false
+overflow-checks = false
+panic = "abort"
+codegen-units = 1
+incremental = false

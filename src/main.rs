@@ -1,7 +1,7 @@
 use std::io::*;
 use std::path::Path;
 use std::fs::read_dir;
-use std::sync::mpsc;
+use std::sync::mpsc::channel;
 use std::env::args;
 use std::thread;
 use std::time::Instant;
@@ -31,7 +31,7 @@ fn get_blocks_map() -> BlockMap {
 			Ok(x) => x.to_rgb8(),
 			Err(_) => continue
 		};
-		let mut colors: [u32; 3] = [0, 0, 0];
+		let mut colors = [0u32, 0, 0];
 		for j in img.pixels() {
 			for k in 0..3 {
 				colors[k] += j.channels()[k] as u32;
@@ -83,7 +83,7 @@ fn main() {
 	let now = Instant::now();
 
 	let mut output_img = ImgBuffer::new(input_img.width()*BLOCK_SIZE, input_img.height()*BLOCK_SIZE);
-	let (sender, receiver) = mpsc::channel();
+	let (sender, receiver) = channel();
 
 	thread::spawn(move || {
 		for (x, y, p) in input_img.enumerate_pixels() {
@@ -101,7 +101,6 @@ fn main() {
 	let time1 = now.elapsed();
 	println!("Processing completed in {:.2?}", time1);
 
-	//suprisingly saving an image on hard drive takes more time than calling ``
 	let now = Instant::now();
 	output_img.save("./minecraft_art.jpeg").unwrap();
 
