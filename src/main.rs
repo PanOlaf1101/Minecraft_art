@@ -4,54 +4,62 @@ use std::{
 	env::args,
 	thread,
 	time::Instant,
-	process::exit
+	process::exit,
 };
+
 mod block_map;
 use block_map::*;
 mod help;
 
+#[inline]
+fn trim_func(c: char) -> bool {
+	" \t\'\"\n".contains(c)
+}
+
 fn main() {
 	let map = get_blocks_map();
+
 	let mut it = args().skip(1);
 	let mut output_name = String::new();
 	let mut scale: u32 = 0;
-	let mut name = String::new();
+	let mut input_name = String::new();
 
 	while let Some(i) = it.next() {
 		if i.as_bytes()[0] == b'-' {
 			let a = it.next().unwrap_or_default();
 			match i.as_str() {
 				"-o" => output_name = a,
-				"-s" => scale = a.parse().expect("The scale must be a positive integer"),
-				"-h" | "--help" | "-help" => {
+				"-s" => scale = a.parse().expect("The scale must be a non-negative integer"),
+				"-h" | "--help" => {
 					println!("{}", help::HELP);
 					exit(0);
 				},
-				"-v" | "--version" | "-version" => {
+				"-v" | "--version" => {
 					println!("Version: {}", env!("CARGO_PKG_VERSION"));
 					exit(0);
 				},
 				_ => eprintln!("Invalid flag: `{i}` (ignored)")
 			}
 		} else {
-			name = i;
+			input_name = i;
 		}
 	}
 
-	if name.is_empty() {
+	if input_name.is_empty() {
 		panic!("No input file has been given!");
 	}
+	let input_name = Path::new(input_name.trim_matches(trim_func));
 
-	let name = Path::new(name.trim());
 	if output_name.is_empty() {
-		output_name = format!("./pixelart.{:#?}.{:#?}", name.file_name().unwrap_or_default(), name.extension());
+		output_name = format!("./pixelart_{}", input_name.file_name().unwrap_or_default().to_str().expect("Unable to convert to an UTF-8 string"));
 	}
-	let output_name = Path::new(output_name.trim());
+	let output_name = Path::new(output_name.trim_matches(trim_func));
+
 	if scale == 0 {
 		scale = 1;
 	}
 
-	let input_img = image::open(name).unwrap().to_rgb8();
+	let input_img = image::open(input_name).expect("Unable to open the input image").to_rgb8();
 
 	//benchmark timer
 	let now = Instant::now();
@@ -70,18 +78,18 @@ fn main() {
 	for (_x, _y, block) in receiver {
 		for x in 0..BLOCK_SIZE {
 			for y in 0..BLOCK_SIZE {
-				*(output_img.get_pixel_mut(BLOCK_SIZE * _x / scale + x, BLOCK_SIZE * _y / scale + y)) = *(block.get_pixel(x, y));
+				*output_img.get_pixel_mut(BLOCK_SIZE * _x / scale + x, BLOCK_SIZE * _y / scale + y) = *block.get_pixel(x, y);
 			}
 		}
 	}
 
 	let time1 = now.elapsed();
-	println!("Processing completed in {:.2?}", time1);
+	println!("Processing completed in {:.2?}.", time1);
 
 	let now = Instant::now();
 	output_img.save(output_name).expect("Cannot save the output image");
 
 	let time2 = now.elapsed();
 	println!("Saving image took {:.2?}.", time2);
-	println!("Summary: {:.2?}.", time1 + time2);
+	println!("Total time: {:.2?}.", time1 + time2);
 }

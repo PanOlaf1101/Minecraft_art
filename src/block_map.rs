@@ -11,7 +11,7 @@ pub type ImgBuffer = image::ImageBuffer<RGB, Vec<u8>>;
 //map where red, blue and green color channels are the key and an image is the value
 pub type BlockMap = Vec<([u8; 3], ImgBuffer)>;
 
-//block should be 16 pixel wide and 16 high
+//block should be 16 pixels wide and 16 pixels high
 pub const BLOCK_SIZE: u32 = 16;
 
 //generates a Minecraft BlockMap with images in ./blocks
