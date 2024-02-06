@@ -1,7 +1,4 @@
-use std::{
-	path::Path,
-	fs::read_dir,
-};
+use std::fs::read_dir;
 use image::Pixel;
 
 //aliases for a single pixel and an image buffer
@@ -14,10 +11,11 @@ pub type BlockMap = Vec<([u8; 3], ImgBuffer)>;
 //block should be 16 pixels wide and 16 pixels high
 pub const BLOCK_SIZE: u32 = 16;
 
-//generates a Minecraft BlockMap with images in ./blocks
+
+//generates a Minecraft BlockMap with images in blocks
 pub fn get_blocks_map() -> BlockMap {
-	let files = read_dir(Path::new("./blocks"))
-		.expect("You must download Minecraft blocks textures into ./block directory");
+	let files = read_dir(format!("{}/blocks", env!("CARGO_MANIFEST_DIR")))
+		.expect("You must download Minecraft blocks textures into block directory");
 
 	let mut map = Vec::with_capacity(177);
 
