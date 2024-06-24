@@ -43,8 +43,7 @@ pub fn get_blocks_map() -> BlockMap {
 }
 
 //matches a pixel with a block
-pub fn get_best_block(map: &BlockMap, pixel: &RGB) -> ImgBuffer {
-	let colors = pixel.channels();
+pub fn get_best_block(map: &BlockMap, colors: [u8; 3]) -> ImgBuffer {
 	let mut diffrence = u32::max_value();
 	let mut img = &ImgBuffer::default();
 

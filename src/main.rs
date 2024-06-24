@@ -9,6 +9,7 @@ use std::{
 
 mod block_map;
 use block_map::*;
+use image::Pixel;
 mod help;
 
 #[inline]
@@ -70,7 +71,15 @@ fn main() {
 	thread::spawn(move || {
 		for y in (0..(input_img.height()/scale * scale)).step_by(scale as _) {
 			for x in (0..(input_img.width())/scale * scale).step_by(scale as _) {
-				sender.send((x, y, get_best_block(&map, input_img.get_pixel(x, y)))).expect("Error occured during sending block");
+				let mut colors = [0u32, 0, 0];
+				for i in 0..scale {
+					for j in 0..scale {
+						for k in 0..3 {
+							colors[k] += input_img.get_pixel(x+j, y+i).channels()[k] as u32;
+						}
+					}
+				}
+				sender.send((x, y, get_best_block(&map, colors.map(|c| (c / (scale*scale)) as u8)))).expect("Error occured during sending block");
 			}
 		}
 	});
