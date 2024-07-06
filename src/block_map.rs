@@ -11,7 +11,6 @@ pub type BlockMap = Vec<([u8; 3], ImgBuffer)>;
 //block should be 16 pixels wide and 16 pixels high
 pub const BLOCK_SIZE: u32 = 16;
 
-
 //generates a Minecraft BlockMap with images in blocks
 pub fn get_blocks_map() -> BlockMap {
 	let files = read_dir(format!("{}/blocks", env!("CARGO_MANIFEST_DIR")))
