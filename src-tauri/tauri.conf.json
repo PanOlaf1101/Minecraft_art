@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "minecraft_art",
+  "version": "0.1.0",
+  "identifier": "panolaf1101.minecraft-art",
+  "build": {
+    "beforeDevCommand": "deno task dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "deno task build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Minecraft Pixelart",
+        "width": 1080,
+        "height": 720
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$HOME/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/128x128.png"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="/src/styles.css" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Minecraft Pixelart</title>
+		<script type="module" src="/src/main.ts" defer></script>
+	</head>
+	<body>
+		<h1>Minecraft Pixelart</h1>
+		<main class="container">
+			<div class="row" style="width: 33.33%;">
+				<button id="input_file">Click to select file</button>
+				<img id="input_image" alt="Input image">
+				<label for="scale"></label>
+				<input type="number" name="scale" id="scale" min="1" max="256" value="16">
+				<button id="output_button">Get pixelart</button>
+			</div>
+			<div class="row" style="width: 66.66%;">
+				<img id="output_image" alt="Output image">
+			</div>
+		</main>
+	</body>
+</html>
